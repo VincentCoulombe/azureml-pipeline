@@ -13,11 +13,15 @@ class AzuremlPipeline():
         with open(filepath, "r") as file_descriptor:
             data = yaml.load(file_descriptor) 
             
-        self.ws, self.env, self.run_name = self._azureml_setup(data.get("azure_config"))
-        self.compute_name, self.compute = self._compute_setup(data.get("compute_config"))
-        
         self.data_config = data.get("data_config")
-        self.steps_config = data.get("steps_config")
+        self.steps_config = data.get("steps_config")  
+        self.azure_config = data.get("azure_config")
+        self.compute_config = data.get("compute_config")
+          
+        self.ws, self.env, self.run_name = self._azureml_setup()
+        self.compute_name, self.compute = self._compute_setup()
+        
+        
         
         self.run_config = RunConfiguration()
         if self.compute_name: self.run_config.target = self.compute
@@ -27,29 +31,30 @@ class AzuremlPipeline():
         self._add_steps()
         
     
-    def _azureml_setup(self, azure_config:dict)->tuple:
-        ws = Workspace(azure_config.get("subscription_id"),
-                    azure_config.get("resource_group"),
-                    azure_config.get("workspace_name"))
-        env = Environment.get(ws,azure_config.get("environment_name")) #Gère cette erreur (pas tjrs besoin d'un env)
-        ds = Datastore(ws, azure_config.get("datastore_name")) #Gère cette erreur (pas tjrs besoin d'un ds)
-        storage_dataset_name = azure_config.get("storage_dataset_name")
+    def _azureml_setup(self)->tuple:
+        ws = Workspace(self.azure_config.get("subscription_id"),
+                    self.azure_config.get("resource_group"),
+                    self.azure_config.get("workspace_name"))
+        env = Environment.get(ws,self.azure_config.get("environment_name")) #Gère cette erreur (pas tjrs besoin d'un env)
+        ds = Datastore(ws, self.data_config.get("datastore_name")) #Gère cette erreur (pas tjrs besoin d'un ds)
+        datasets_name = self.data_config.get("datasets")
+        storage_dataset_name = datasets_name.get("to_import")
         path = [(ds,f"{storage_dataset_name}.csv")]
         data = Dataset.Tabular.from_delimited_files(path=path)
         data.register(workspace=ws, name=storage_dataset_name, create_new_version=True)
-        return ws, env, azure_config.get("experiment_name")
+        return ws, env, self.azure_config.get("experiment_name")
     
-    def _compute_setup(self, compute_config:dict)->tuple:
-        if isinstance(compute_config, dict):
-            compute_name = compute_config.get("name")
+    def _compute_setup(self)->tuple:
+        if isinstance(self.compute_config, dict):
+            compute_name = self.compute_config.get("name")
             try:
                 compute = ComputeTarget(workspace=self.ws, name=compute_name)
                 print("Va utiliser le compute gpu déjà provisionné")
             except ComputeTargetException:
-                compute_config = AmlCompute.provisioning_configuration(vm_size=compute_config.get("type"),
+                self.compute_config = AmlCompute.provisioning_configuration(vm_size=self.compute_config.get("type"),
                                                                         min_nodes=0,
                                                                         max_nodes=1)
-                compute = ComputeTarget.create(self.ws, compute_name, compute_config)
+                compute = ComputeTarget.create(self.ws, compute_name, self.compute_config)
                 print("Va provisionner un nouveau compute gpu")
             except UnboundLocalError as e:
                 print(f"Veuillez relancer le script, erreur critique: {e}")
