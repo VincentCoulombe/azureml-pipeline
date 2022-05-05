@@ -8,10 +8,10 @@ from azureml.core.runconfig import RunConfiguration
 import json
 import yaml
 
-class Azureml_pipeline():
+class AzuremlPipeline():
     def __init__(self, filepath:str) -> None:
         with open(filepath, "r") as file_descriptor:
-            data = yaml.full_load(file_descriptor) 
+            data = yaml.load(file_descriptor) 
             
         self.ws, self.env, self.run_name = self._azureml_setup(data.get("azure_config"))
         self.compute_name, self.compute = self._compute_setup(data.get("compute_config"))
