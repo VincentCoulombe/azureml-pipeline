@@ -65,7 +65,7 @@ class AzuremlPipeline():
         return compute_name, compute
     
     def _add_steps(self)->None:
-        for _, step_config in self.steps_config.items():
+        for step_config in self.steps_config:
             self.add_step(step_config)
 
     def _add_step(self, step_config:dict)->None:
