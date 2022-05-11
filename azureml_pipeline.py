@@ -6,16 +6,63 @@ from azureml.core.compute import ComputeTarget, AmlCompute
 from azureml.core.compute_target import ComputeTargetException
 from azureml.core.runconfig import RunConfiguration
 import json
-import yaml
 
 class AzuremlWorkspace():
-    def __init__(self, workspace:Workspace, environment:Environment, compute_name:str, compute_size:str, compute_min_nodes:int=0, compute_max_nodes:int=1) -> None:
-        if not isinstance(workspace, Workspace): raise TypeError("workspace doit être un Workspace")
-        if not isinstance(environment, Environment): raise TypeError("environment doit être un Environment")
-        self.ws = workspace
-        self.env = environment
-        self.ds = None
+    def __init__(self,ws_name:str, resource_group:str, subscription_id:str, env_name:str,
+                 compute_name:str, compute_size:str="Standard_NC6", compute_min_nodes:int=0, compute_max_nodes:int=1) -> None:
+        self.ws = Workspace.get(name=ws_name,
+                            subscription_id=subscription_id,
+                            resource_group=resource_group)
         
+        self.env = Environment.get(self.ws,env_name)        
+        self._init_compute(compute_name, compute_size, compute_min_nodes, compute_max_nodes)
+    
+    @classmethod
+    def from_dict(cls, **config):
+        return cls(config.get("ws_name"), config.get("resource_group"), config.get("subscription_id"), 
+                                config.get("env_name"), config.get("compute_name"), config.get("compute_size"), 
+                                config.get("compute_min_nodes"), config.get("compute_max_nodes"))
+  
+    @property
+    def ws(self):
+        return self._ws
+            
+    @ws.setter
+    def ws(self, new_ws:Workspace):
+        self._ws = new_ws
+    
+    @property
+    def env(self):
+        return self._env 
+    
+    @env.setter
+    def env(self, new_env:Environment):
+        self._env = new_env      
+    
+    @property
+    def compute(self):
+        return self._compute
+    
+    @compute.setter
+    def compute(self, new_compute:ComputeTarget):
+        self._compute = new_compute
+    
+    def register_new_csv(self, datastore_name:Datastore, dataset_name:str) -> None:
+        if datastore_name in self.ws.datastores:
+            datastore = Datastore.get(self.ws, datastore_name)
+        else:
+            raise NameError(f"""Le Datastore {datastore_name} n'est pas enregistré dans le workspace {self.ws.name} 
+                                du resource groupe {self.ws.resource_group} de l'id {self.ws.subscription_id}.
+                                Vous pouvez en enregistrer un via le browser web d'AzureML.""")
+        if dataset_name.endswith(".csv"): dataset_name = dataset_name[:-4]
+        path = [(datastore,f"{dataset_name}.csv")]
+        data = Dataset.Tabular.from_delimited_files(path=path)
+        data.register(workspace=self.ws, name=dataset_name, create_new_version=True)
+    
+    def provision_compute(self, compute_name:str, compute_size:str="Standard_NC6", compute_min_nodes:int=0, compute_max_nodes:int=1):
+        self._init_compute(compute_name, compute_size, compute_min_nodes, compute_max_nodes)
+        
+    def _init_compute(self, compute_name:str, compute_size:str, compute_min_nodes:int=0, compute_max_nodes:int=1):
         try:
             compute = ComputeTarget(workspace=self.ws, name=compute_name)
         except ComputeTargetException:
@@ -29,13 +76,6 @@ class AzuremlWorkspace():
         finally:    
             compute.wait_for_completion(show_output=True)
         self.compute = compute
-    
-    def register_new_csv(self, datastore:Datastore, dataset_name:str) -> None:
-        if not isinstance(datastore, Datastore): raise TypeError("datastore doit être un Datastore")
-        if dataset_name.endswith(".csv"): dataset_name = dataset_name[:-4]
-        path = [(datastore,f"{dataset_name}.csv")]
-        data = Dataset.Tabular.from_delimited_files(path=path)
-        data.register(workspace=self.ws, name=dataset_name, create_new_version=True)
         
 
 class PipelineStep():
@@ -46,7 +86,8 @@ class PipelineStep():
             name (str): Le nom de l'étape
             script_name (str): Le nom du script python associé à rouler
             config (dict): Les configurations à passer au script python. Ils seront passés via l'argument: --config
-            input_datasets (dict): Les datasets à passer au script python. Les items seront passés dans des arguments ayant comme nom les clées. 
+            input_datasets (dict): Les datasets à passer au script python. Les items seront passés dans des arguments ayant comme nom les clées.
+                                    Par exemple, input_datasets[--new-data] =  new_dataset.
                                     Ces datasets doivent êtres dans le workspace du AzuremlWorkspace passé en argument avec ce StepConfig.
         """
         self.azureml_config = azureml_config
@@ -56,7 +97,10 @@ class PipelineStep():
         self.arguments = ["--config", json.dumps(step_config)] if isinstance(step_config, dict) else []
         if isinstance(input_datasets, dict):
             for input_arg_name, input_arg in input_datasets.items():
-                data = self.azureml_config.ws.datasets.get(input_arg) #Gère cette erreur (data not registered)
+                data = self.azureml_config.ws.datasets.get(input_arg)
+                if data is None: raise NameError(f"""Le Dataset {input_arg} n'est pas enregistré dans le workspace {self.azureml_config.ws.name} 
+                                                    du resource groupe {self.azureml_config.ws.resource_group} de l'id {self.azureml_config.ws.subscription_id}.
+                                                    Vous pouvez en enregistrer un via la méthode register_new_csv() d'AzuremlWorkspace.""")
                 self.arguments.extend([input_arg_name, data.as_named_input(input_arg)]) 
 
 class AzuremlPipeline():
@@ -66,8 +110,8 @@ class AzuremlPipeline():
         
         self.run_config = RunConfiguration() 
         self.run_config.environment = self.azureml_ws.env
-        if not self.azureml_ws.compute: raise TypeError("""Vous devez avoir un compute de provisionner dans azureml_ws pour pouvoir lancer un AzuremlPipeline.
-                                                        Vous pouvez provisionner un compute via la méthode provision_compute d'AzuremlWorkspace.""")
+        if not self.azureml_ws.compute: raise TypeError("""Vous devez avoir un compute de provisionner dans votre AzuremlWorkspace pour pouvoir lancer un AzuremlPipeline.
+                                                        Vous pouvez provisionner un compute via la méthode provision_compute() d'AzuremlWorkspace.""")
         self.run_config.target = self.azureml_ws.compute 
                 
         self.pipeline_steps = []
@@ -99,49 +143,8 @@ class AzuremlPipeline():
         run = experiment.submit(pipeline)
         run.wait_for_completion()
         
-if __name__ == '__main__':
-    ws = Workspace("7240386a-1717-43ab-9acf-f5fccc41ddbb",
-                   "analyse-sentiment-kara",
-                   "as-kara")
-    env = Environment.get(ws,"deep-learning")
-    
-    ws = AzuremlWorkspace(ws, env, "gpu-compute001", "Standard_NC6")
-    
-    prep_step = PipelineStep(ws, "data prep", "data_prep.py", step_config={"storage_acc_name": "analysesentiment",
-                                                                    "storage_acc_key": "fi7WJU/dsYPstX//gkSBihTmUGRKzNb37uDOrOuZHnpRHm37spFPzhYxI0DkhEs+/E9MDsDbdoPyQzif4Z2XAA==",
-                                                                    "container_name": "sondage",
-                                                                    "new_dataset_name": "testing_sdk",
-                                                                    "train_dataset_name": "testing_sdk_train",
-                                                                    "test_dataset_name": "testing_sdk_test",
-                                                                    "labels_col_name": "CategoriePhrase",
-                                                                    "texts_col_name": "PhrasesEN",
-                                                                    "test_size": 0.1,
-                                                                    "shuffle": True,
-                                                                    "max_text_lenght": 512,
-                                                                    "min_text_lenght": 5}, 
-                                                                    input_datasets={"--new-data": "testing_sdk",
-                                                                                    "--test-data": "testing_sdk_test"})
-    
-    train_step = PipelineStep(ws, "train test save", "classifier_finetuner.py", step_config={"lr": 0.00002,
-                                                                                            "epochs": 1,
-                                                                                            "text_lenght": 512,
-                                                                                            "batch_size": 16,
-                                                                                            "nb_labels": 4,
-                                                                                            "sup_dataset_name": "testing_sdk_train", 
-                                                                                            "test_dataset_name": "testing_sdk_test",
-                                                                                            "labels_col_name": "CategoriePhrase",
-                                                                                            "texts_col_name": "PhrasesEN",
-                                                                                            "name": "test_model",
-                                                                                            "HuggingFace_name": "distilbert-base-uncased"})
-    
-    deploy_step = PipelineStep(ws, "deploy", "deployer_model.py", step_config={"env_name": "deep-learning",
-                                                                                "model_names": ["test_model"],
-                                                                                "web_service_name": "test",
-                                                                                "inference_script_name": "test_inference_script.py",
-                                                                                "cpu_cores": 1,
-                                                                                "memory": 3})
-    pipeline = AzuremlPipeline(ws, prep_step, train_step, deploy_step)
-    pipeline.run("test")
+
+
 
 
     
