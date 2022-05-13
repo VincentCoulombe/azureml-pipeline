@@ -36,3 +36,26 @@ Avec le Wrapper, il est très facile de lancer des expériences dans le cloud vi
   2. Un ou des [Dataset(s)](https://docs.microsoft.com/en-us/python/api/azureml-core/azureml.core.dataset.dataset?view=azure-ml-py) enregistrés dans le         Workspace du pipeline (sera passé via input_datasets)
   3. Des [outputfiledatasetconfig](https://docs.microsoft.com/en-us/python/api/azureml-core/azureml.data.output_dataset_config.outputfiledatasetconfig?view=azure-ml-py) seront crées automatiquement pour communiquer de l'information entre vos steps. Chaque step recevra donc un `--input-foler` (sauf le premier step du pipeline) et un `--output-folder` (sauf le dernier step du pipeline).
 
+Exemple 1) Script Python associé à un step du Pipeline. Ce step est un step intermédiaire du pipeline, il reçoit donc un input folder et devra retourner un output folder. Il reçoit aussi deux Datasets (test_data et new_data) en plus de la configuration.
+```
+run = Run.get_context()
+parser = argparse.ArgumentParser()
+parser.add_argument("--config", type=json.loads, dest="config") #Les hyperparamètres, est un dictionnaire!
+parser.add_argument("--new-data", type=str, dest="new_data")
+parser.add_argument("--test-data", type=str, dest="test_data")
+parser.add_argument("--input-folder", type=str, dest="input_folder") #Folder contenant les données reçus de step précédent
+parser.add_argument("--output-folder", type=str, dest="output_folder") #Folder dans lequel mettre les données à passer au prochain step
+args = parser.parse_args()
+config = args.config 
+new_dataset = run.input_datasets[config.get("new_dataset_name")].to_pandas_dataframe() #Les datasets deviennent des DataFrames
+test_dataset = run.input_datasets[config.get("test_dataset_name")].to_pandas_dataframe()
+
+# TODO
+
+run.complete()
+```
+
+Exemple 2)  Création d'un PipelineStep
+
+Exemple 3) Création du même PipelineStep via .from_config
+
