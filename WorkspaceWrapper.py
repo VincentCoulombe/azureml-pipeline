@@ -56,7 +56,7 @@ class WorkspaceWrapper():
         if name in self.ws.environments: print(f"L'Environnement {name} est déjà enregistré dans le Workspace {self.ws.name}.")        
         else: 
             environment = Environment(name)
-            environment.python.conda_dependencies = CondaDependencies.create(pip_packages=[])
+            environment.python.conda_dependencies = CondaDependencies.create(pip_packages=[dependencies])
             environment.register(self.ws)
         
     def register_blob_datastore(self, name:str, container_name:str, storage_name:str, storage_key:str):
