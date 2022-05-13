@@ -30,3 +30,9 @@ La classe WorkspaceWrapper permet à l'utilisateur de :
   - `mon_workspace.register_compute("test-compute001")`  
   À noter qu'il est également possible de choisir la taille et le nombre de workers (min, max) du compute.
  
+### Créer, Modifier, Lancer et Enregistrer des Pipelines et des Expériences 
+Avec le Wrapper, il est très facile de lancer des expériences dans le cloud via des pipelines. Ces pipelines peuvent avoirs une ou plusieurs steps. Ces steps sont des scripts Python qui seront roulés dans le Cloud. Ces scripts devront commencés par la ligne de code suivante : `run = Run.get_context()` et finir par `run.complete()` pour pouvoir être track par le pipeline. Il est également possible de log dans [Run](https://docs.microsoft.com/en-us/python/api/azureml-core/azureml.core.run(class)?view=azure-ml-py). De plus, chaque step va pouvoir avoir accès à des arguments. Les arguments possibles sont les suivants : 
+  1. Une configuration, qui est un dictionnaire contenant les hyperparamètre de vos scripts (sera passé via step_config). Cette configuration sera accessible via l'argument `--config`
+  2. Un ou des [Dataset(s)](https://docs.microsoft.com/en-us/python/api/azureml-core/azureml.core.dataset.dataset?view=azure-ml-py) enregistrés dans le         Workspace du pipeline (sera passé via input_datasets)
+  3. Des [outputfiledatasetconfig](https://docs.microsoft.com/en-us/python/api/azureml-core/azureml.data.output_dataset_config.outputfiledatasetconfig?view=azure-ml-py) seront crées automatiquement pour communiquer de l'information entre vos steps. Chaque step recevra donc un `--input-foler` (sauf le premier step du pipeline) et un `--output-folder` (sauf le dernier step du pipeline).
+
