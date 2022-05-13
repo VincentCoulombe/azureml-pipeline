@@ -4,7 +4,8 @@
 Une couche d'abstraction autour des classes du AzureML sdk pour Python. Permet de simplifier l'utilisation du dit sdk en prenant soin de faire la poutine habituelle à la place de l'utilisateur.
 
 ## Comment l'installer?
-À remplir
+1. s'assurer d'avoir azureml.core et azureml.pipeline d'installer.
+1. `pip install git+https://github.com/VincentCoulombe/azureml_wrapper`
 
 ## Comment ça marche?  
 La suivante est un mini-tutoriel sur comment utiliser le Wrapper.
