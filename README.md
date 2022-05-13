@@ -20,7 +20,7 @@ La classe WorkspaceWrapper permet à l'utilisateur de :
 3. Enregistrer un [Environnement](https://docs.microsoft.com/en-us/python/api/azureml-core/azureml.core.environment(class)?view=azure-ml-py) d'exécution custom dans le Workspace. Exemple :
   - `mon_workspace.register_env("test-env", ["pandas", "matplotlib"])`
 
-4. Enregistrer un [Datastore](https://docs.microsoft.com/en-us/python/api/azureml-core/azureml.core.datastore(class)?view=azure-ml-py) vers un [Azure Blob Container] (https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blobs-introduction) . Exemple : 
+4. Enregistrer un [Datastore](https://docs.microsoft.com/en-us/python/api/azureml-core/azureml.core.datastore(class)?view=azure-ml-py) vers un [Azure Blob Container](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blobs-introduction). Exemple : 
   - `mon_workspace.register_blob_datastore("test-datastore", "nom du container", "nom du blob", "clé d'accès")`
 
 5. Enregistrer un csv dans le Workspace avec un Datastore. Exemple : 
