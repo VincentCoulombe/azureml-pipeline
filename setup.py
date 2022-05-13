@@ -14,6 +14,6 @@ setuptools.setup(
     url="https://github.com/VincentCoulombe/azureml_wrapper.git",
     license="MIT",
     py_modules=["PipelineStep.py", "PipelineWrapper.py", "WorkspaceWrapper.py"],
-    # package_dir={"":"src"},
+    package_dir={"":"src"},
     install_requires=["azureml.core", "azureml.data", "azureml.pipeline", "azureml.exceptions"]
 )
