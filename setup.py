@@ -14,5 +14,5 @@ setuptools.setup(
     url="https://github.com/VincentCoulombe/azureml_wrapper.git",
     license="MIT",
     packages=["src"],
-    install_requires=["azureml.core", "azureml.pipeline", "azureml.exceptions"]
+    install_requires=["azureml.core", "azureml.pipeline"]
 )
