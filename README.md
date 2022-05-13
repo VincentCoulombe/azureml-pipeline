@@ -3,6 +3,9 @@
 ## C'est quoi
 Une couche d'abstraction autour des classes du AzureML sdk pour Python. Permet de simplifier l'utilisation du dit sdk en prenant soin de faire la poutine habituelle à la place de l'utilisateur.
 
+## Comment l'installer?
+À remplir
+
 ## Comment ça marche?  
 La suivante est un mini-tutoriel sur comment utiliser le Wrapper.
 
