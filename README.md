@@ -107,14 +107,14 @@ config = {"ws_name":"nom du ws",
 step = PipelineStep.from_config(config)
 ```
 
-***Exemple 6) Lancer une Run du pipeline***  
+**Exemple 6) Lancer une Run du pipeline**    
 Simplement appeler la méthode run en lui donnant un nom [d'Experiment](https://docs.microsoft.com/en-us/python/api/azureml-core/azureml.core.experiment.experiment?view=azure-ml-py).
 
 ```
 pipeline.run("nom de l'experiment")
 ```
 
-***Exemple 7) Enregistrer le pipeline***  
+**Exemple 7) Enregistrer le pipeline**  
 Enregistrer le pipeline permet de pouvoir le relancer automatiquement via une request url, périodiquement via une schédule ou bien quand un Dataset dans un certain blob storage est mis à jour. Bref, si vous souhaiter schéduler un relancement périodique du pipeline, simplement spécifier une fréquence ("Minute", "Hour", "Day", "Week" ou "Month") et un interval. Si vous souhaiter schéduler le relancement du pipeline quand un blo storage est mis à jour, simplement sélectionner la schédule "On_blob_change" et spécifier un Datastore vers ce blob storage.
 
 1) Enregistrer le pipeline sans schédule:    
