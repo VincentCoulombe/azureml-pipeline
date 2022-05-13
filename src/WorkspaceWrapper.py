@@ -56,7 +56,7 @@ class WorkspaceWrapper():
         if name in self.ws.environments: print(f"L'Environnement {name} est déjà enregistré dans le Workspace {self.ws.name}.")        
         else: 
             environment = Environment(name)
-            environment.python.conda_dependencies = CondaDependencies.create(pip_packages=[dependencies])
+            environment.python.conda_dependencies = CondaDependencies.create(pip_packages=dependencies)
             environment.register(self.ws)
         
     def register_blob_datastore(self, name:str, container_name:str, storage_name:str, storage_key:str):
@@ -81,7 +81,15 @@ class WorkspaceWrapper():
             data = Dataset.Tabular.from_delimited_files(path=path)
             data.register(workspace=self.ws, name=dataset_name, create_new_version=True)
     
-    def register_compute(self, name:str, compute_size:str="Standard_NC6", compute_min_nodes:int=0, compute_max_nodes:int=1):
+    def register_compute(self, name:str, compute_size:str="Standard_NC6", compute_min_nodes:int=0, compute_max_nodes:int=1) -> None:
+        """Enregistre un compute cluster dans ws.
+
+        Args:
+            name (str): Le nom du cluster
+            compute_size (str, optional): La taille du cluster. Defaults to "Standard_NC6".
+            compute_min_nodes (int, optional): Le nombre minimal de workers. Defaults to 0.
+            compute_max_nodes (int, optional): Le nombre maximal de workers. Defaults to 1.
+        """
         if name in self.ws.compute_targets: print(f"Le Compute {name} est déjà enregistré dans le Workspace {self.ws.name}.") 
         else:
             compute_config = AmlCompute.provisioning_configuration(vm_size=compute_size,

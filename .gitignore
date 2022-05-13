@@ -1,1 +1,4 @@
-__pycache__/
+**/__pycache__/
+src/test.py
+src/test_step1.py
+src/test_step2.py
