@@ -16,3 +16,17 @@ La classe WorkspaceWrapper permet à l'utilisateur de :
     
 2. Accéder à toutes les méthodes et attributs de la classe [Workspace](https://docs.microsoft.com/en-us/python/api/azureml-core/azureml.core.workspace.workspace?view=azure-ml-py) d'AzureML via:
   - `mon_workspace.ws` 
+ 
+3. Enregistrer un [Environnement](https://docs.microsoft.com/en-us/python/api/azureml-core/azureml.core.environment(class)?view=azure-ml-py) d'exécution custom dans le Workspace. Exemple :
+  - `mon_workspace.register_env("test-env", ["pandas", "matplotlib"])`
+
+4. Enregistrer un [Datastore](https://docs.microsoft.com/en-us/python/api/azureml-core/azureml.core.datastore(class)?view=azure-ml-py) vers un [Azure Blob Container] (https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blobs-introduction). Exemple : 
+  - `mon_workspace.register_blob_datastore("test-datastore", "nom du container", "nom du blob", "clé d'accès")`
+
+5. Enregistrer un csv dans le Workspace avec un Datastore. Exemple : 
+  - `mon_workspace.register_csv("test-datastore", "test_dataset.csv")`
+
+6. Enregistrer un [compute cluster](https://docs.microsoft.com/en-us/azure/machine-learning/how-to-create-attach-compute-cluster?tabs=python) dans le Workspace. Exemple :
+  - `mon_workspace.register_compute("test-compute001")`
+  À noter qu'il est également possible de choisir la taille et le nombre de workers (min, max) du compute.
+ 
