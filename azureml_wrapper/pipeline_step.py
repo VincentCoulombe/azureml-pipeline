@@ -1,8 +1,8 @@
 import json
 
-import workspace_wrapper
+from .workspace_wrapper import WorkspaceWrapper
 
-class PipelineStep(workspace_wrapper.WorkspaceWrapper):
+class PipelineStep(WorkspaceWrapper):
     MANDATORY_CONFIGS = ["ws_name", "resource_group", "subscription_id", "step_name", "script_name"]
     def __init__(self, ws_name:str, resource_group:str, subscription_id:str, step_name:str, script_name:str, step_config:dict=None, input_datasets:dict=None) -> None:
         """Créer une étape du Pipeline, les OutputFileDatasetConfigs sont créés automatiquement.

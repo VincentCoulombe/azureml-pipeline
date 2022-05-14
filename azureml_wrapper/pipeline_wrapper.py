@@ -6,10 +6,10 @@ from azureml.core.compute import ComputeTarget
 from azureml.core.compute_target import ComputeTargetException
 from azureml.core.runconfig import RunConfiguration
 
-import workspace_wrapper
-import pipeline_step
+from .workspace_wrapper import WorkspaceWrapper
+from .pipeline_step import PipelineStep
 
-class PipelineWrapper(workspace_wrapper.WorkspaceWrapper):
+class PipelineWrapper(WorkspaceWrapper):
     MANDATORY_CONFIGS = ["ws_name", "resource_group", "subscription_id", "env_name", "compute_name", "steps"]
     POSSIBLE_SCHEDULES = ["On_blob_change", "Minute", "Hour", "Day", "Week", "Month"]
     def __init__(self, ws_name:str, resource_group:str, subscription_id:str, env_name:str, compute_name:str, steps:list) -> None:
