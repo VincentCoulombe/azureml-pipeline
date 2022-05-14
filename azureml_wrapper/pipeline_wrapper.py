@@ -6,10 +6,10 @@ from azureml.core.compute import ComputeTarget
 from azureml.core.compute_target import ComputeTargetException
 from azureml.core.runconfig import RunConfiguration
 
-from azureml_wrapper import WorkspaceWrapper
-from azureml_wrapper import PipelineStep
+import workspace_wrapper
+import pipeline_step
 
-class PipelineWrapper(WorkspaceWrapper):
+class PipelineWrapper(workspace_wrapper.WorkspaceWrapper):
     MANDATORY_CONFIGS = ["ws_name", "resource_group", "subscription_id", "env_name", "compute_name", "steps"]
     POSSIBLE_SCHEDULES = ["On_blob_change", "Minute", "Hour", "Day", "Week", "Month"]
     def __init__(self, ws_name:str, resource_group:str, subscription_id:str, env_name:str, compute_name:str, steps:list) -> None:
@@ -64,12 +64,12 @@ class PipelineWrapper(WorkspaceWrapper):
         steps= []
         for _, step_config in steps_config.items():
             step_config = {**base_config, **step_config}
-            steps.append(PipelineStep.from_config(step_config))
+            steps.append(pipeline_step.PipelineStep.from_config(step_config))
            
         return cls(config.get("ws_name"), config.get("resource_group"), config.get("subscription_id"), config.get("env_name"), config.get("compute_name"), steps)
    
-    def add_step(self, step:PipelineStep):  
-        if not isinstance(step, PipelineStep): raise TypeError("Le paramètre step doit être un instance de la classe PipelineStep.")
+    def add_step(self, step:pipeline_step.PipelineStep):  
+        if not isinstance(step, pipeline_step.PipelineStep): raise TypeError("Le paramètre step doit être un instance de la classe PipelineStep.")
         if self.ws.name != step.ws.name: raise ValueError(f"Le Workspace du paramètre step ({step.ws.name}) doit être le même que celui du pipeline ({self.ws.name})")
         
         
