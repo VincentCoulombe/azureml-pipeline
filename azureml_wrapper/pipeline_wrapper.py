@@ -64,12 +64,12 @@ class PipelineWrapper(WorkspaceWrapper):
         steps= []
         for _, step_config in steps_config.items():
             step_config = {**base_config, **step_config}
-            steps.append(pipeline_step.PipelineStep.from_config(step_config))
+            steps.append(PipelineStep.from_config(step_config))
            
         return cls(config.get("ws_name"), config.get("resource_group"), config.get("subscription_id"), config.get("env_name"), config.get("compute_name"), steps)
    
-    def add_step(self, step:pipeline_step.PipelineStep):  
-        if not isinstance(step, pipeline_step.PipelineStep): raise TypeError("Le paramètre step doit être un instance de la classe PipelineStep.")
+    def add_step(self, step:PipelineStep):  
+        if not isinstance(step, PipelineStep): raise TypeError("Le paramètre step doit être un instance de la classe PipelineStep.")
         if self.ws.name != step.ws.name: raise ValueError(f"Le Workspace du paramètre step ({step.ws.name}) doit être le même que celui du pipeline ({self.ws.name})")
         
         
