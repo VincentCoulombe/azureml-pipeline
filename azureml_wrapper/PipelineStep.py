@@ -1,6 +1,6 @@
 import json
 
-from azureml_wrapper.WorkspaceWrapper import WorkspaceWrapper
+from WorkspaceWrapper import WorkspaceWrapper
 
 class PipelineStep(WorkspaceWrapper):
     MANDATORY_CONFIGS = ["ws_name", "resource_group", "subscription_id", "step_name", "script_name"]
