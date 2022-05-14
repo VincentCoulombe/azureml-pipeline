@@ -11,8 +11,8 @@ setuptools.setup(
     description="Wrapper autour du azureml-sdk.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/VincentCoulombe/azureml_wrapper.git",
+    url="https://github.com/VincentCoulombe/azuremlwrapper",
     license="MIT",
-    packages=["src"],
+    packages=["azureml_wrapper"],
     install_requires=["azureml.core", "azureml.pipeline"]
 )
