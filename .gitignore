@@ -1,4 +1,4 @@
 **/__pycache__/
-src/test.py
-src/test_step1.py
-src/test_step2.py
+azureml_wrapper/test.py
+azureml_wrapper/test_step1.py
+azureml_wrapper/test_step2.py
