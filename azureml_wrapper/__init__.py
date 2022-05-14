@@ -1,3 +1,3 @@
-from PipelineStep import *
-from PipelineWrapper import *
-from WorkspaceWrapper import *
+from .PipelineStep import *
+from .PipelineWrapper import *
+from .WorkspaceWrapper import *
