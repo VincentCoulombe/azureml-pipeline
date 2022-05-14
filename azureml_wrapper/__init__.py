@@ -1,3 +1,3 @@
-from azureml_wrapper.PipelineStep import PipelineStep
-from azureml_wrapper.PipelineWrapper import PipelineWrapper
-from azureml_wrapper.WorkspaceWrapper import WorkspaceWrapper
+from PipelineStep import *
+from PipelineWrapper import *
+from WorkspaceWrapper import *

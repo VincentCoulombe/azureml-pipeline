@@ -6,8 +6,8 @@ from azureml.core.compute import ComputeTarget
 from azureml.core.compute_target import ComputeTargetException
 from azureml.core.runconfig import RunConfiguration
 
-from WorkspaceWrapper import WorkspaceWrapper
-from PipelineStep import PipelineStep
+from azureml_wrapper import WorkspaceWrapper
+from azureml_wrapper import PipelineStep
 
 class PipelineWrapper(WorkspaceWrapper):
     MANDATORY_CONFIGS = ["ws_name", "resource_group", "subscription_id", "env_name", "compute_name", "steps"]
