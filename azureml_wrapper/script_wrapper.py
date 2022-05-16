@@ -11,13 +11,14 @@ class ScriptWrapper():
         self.parser = argparse.ArgumentParser()
         self.args_list = []
         for arg in sys.argv[1:]:
-            if str(arg) == "--config":
-                self.parser.add_argument("--config", type=json.loads, dest="config")
-                self.args_list.append("config")
-            else:
-                arg_name = str(arg).replace("--","").replace("-", "_")
-                self.parser.add_argument(str(arg), type=str, dest=arg_name)
-                self.args_list.append(arg_name)        
+            if arg.startswith("--"):
+                if str(arg) == "--config":
+                    self.parser.add_argument("--config", type=json.loads, dest="config")
+                    self.args_list.append("config")
+                else:
+                    arg_name = str(arg).replace("--","").replace("-", "_")
+                    self.parser.add_argument(str(arg), type=str, dest=arg_name)
+                    self.args_list.append(arg_name)        
         self.args = self.parser.parse_args()                
        
     @property
