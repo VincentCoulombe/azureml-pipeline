@@ -16,7 +16,7 @@ class ScriptWrapper():
                 self.args_list.append("config")
             else:
                 arg_name = str(arg).replace("--","").replace("-", "_")
-                self.parser.add_argument(str(arg), type=str, dest=str(arg).replace("--","").replace("-", "_"))
+                self.parser.add_argument(str(arg), type=str, dest=arg_name)
                 self.args_list.append(arg_name)        
         self.args = self.parser.parse_args()                
        
