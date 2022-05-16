@@ -8,7 +8,7 @@ import sys
 class ScriptWrapper():
     def __init__(self) -> None:
         self.run = Run.get_context()
-        self.parser = argparse.ArgumentParser
+        self.parser = argparse.ArgumentParser()
         self.args_list = []
         for arg in sys.argv[1:]:
             if str(arg) == "--config":
