@@ -5,6 +5,7 @@ from azureml.pipeline.core import Pipeline, Schedule, ScheduleRecurrence
 from azureml.core.compute import ComputeTarget
 from azureml.core.compute_target import ComputeTargetException
 from azureml.core.runconfig import RunConfiguration
+import os
 
 from .workspace_wrapper import WorkspaceWrapper
 from .pipeline_step import PipelineStep
@@ -75,6 +76,7 @@ class PipelineWrapper(WorkspaceWrapper):
         
         if step != self.steps[-1]: step.arguments.extend(["--output-folder", self.output_folder])
         if self.input_folder: step.arguments.extend(["--input-folder", self.input_folder.as_input()])
+        print(os.path.abspath(__file__))
         self.pipeline_steps.append(PythonScriptStep(name = step.name,
                             source_directory = ".",
                             script_name = step.script_name,
@@ -88,9 +90,9 @@ class PipelineWrapper(WorkspaceWrapper):
         
     def run(self, experiment_name:str)->None:
         if len(self.pipeline_steps)>0:
-            Pipeline(workspace=self.ws, steps=self.pipeline_steps)
+            self.pipeline = Pipeline(workspace=self.ws, steps=self.pipeline_steps)
             self.experiment = Experiment(workspace=self.ws, name=experiment_name)
-            self.run = self.experiment.submit(self._pipeline)
+            self.run = self.experiment.submit(self.pipeline)
             self.run.wait_for_completion()
         
     def register(self, name:str, description:str, schedule:str=None, interval:int=None, datastore_name:str=None):
