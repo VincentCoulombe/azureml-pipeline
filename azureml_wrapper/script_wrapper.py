@@ -14,11 +14,11 @@ class ScriptWrapper():
             if arg.startswith("--"):
                 if str(arg) == "--config":
                     self.parser.add_argument("--config", type=json.loads, dest="config")
-                    self.args_list.append("--config")
-                else:
-                    arg_name = str(arg).replace("--","").replace("-", "_")
-                    self.parser.add_argument(str(arg), type=str, dest=arg_name)
-                    self.args_list.append(arg_name)        
+                    self.args_list.append("config")
+                # else:
+                #     arg_name = str(arg).replace("--","").replace("-", "_")
+                #     self.parser.add_argument(str(arg), type=str, dest=arg_name)
+                #     self.args_list.append(arg_name)        
         self.args = self.parser.parse_args()                
        
     @property
@@ -31,7 +31,7 @@ class ScriptWrapper():
             self._run = new_run
             
     def get_config(self):
-        if "--config" not in self.args_list: raise ValueError(f"--config n'est pas dans la liste d'arguments reçus. Soit : {self.args_list}.")
+        if "config" not in self.args_list: raise ValueError(f"config n'est pas dans la liste d'arguments reçus. Soit : {self.args_list}.")
         return self.args.config 
     
     def get_csv_from_input_folder(self, csv_name:str) -> pd.DataFrame:
