@@ -13,7 +13,7 @@ class ScriptWrapper():
         for arg in sys.argv[1:]:
             if arg.startswith("--"):
                 if str(arg) == "--config":
-                    self.parser.add_argument("--config", type=json.loads, dest="config")
+                    self.parser.add_argument("--config", type=json.loads(), dest="config")
                     self.args_list.append("config")
                 # else:
                 #     arg_name = str(arg).replace("--","").replace("-", "_")
