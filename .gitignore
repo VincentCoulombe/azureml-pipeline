@@ -1,4 +1,2 @@
 **/__pycache__/
-test.py
-test_step1.py
-test_step2.py
+test/workspaceConfig.json
