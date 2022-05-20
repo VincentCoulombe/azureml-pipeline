@@ -41,9 +41,16 @@ Avec le Wrapper, il est très facile de lancer des expériences dans le cloud vi
   2. Un ou des [Dataset(s)](https://docs.microsoft.com/en-us/python/api/azureml-core/azureml.core.dataset.dataset?view=azure-ml-py) enregistrés dans le         Workspace du pipeline (sera passé via input_datasets)
   3. Des [outputfiledatasetconfig](https://docs.microsoft.com/en-us/python/api/azureml-core/azureml.data.output_dataset_config.outputfiledatasetconfig?view=azure-ml-py) seront crées automatiquement pour communiquer de l'information entre vos steps. Chaque step recevra donc un `--input-foler` (sauf le premier step du pipeline) et un `--output-folder` (sauf le dernier step du pipeline).
 
-**Exemple 1) Script Python associé à un step du Pipeline**  
+**Exemple 1.1) Script Python associé à un step du Pipeline SANS ScriptWrapper**  
 Ce step est un step intermédiaire du pipeline, il reçoit donc un input folder et devra retourner un output folder. Il reçoit aussi deux Datasets (test_data et new_data) en plus de la configuration.
 ```
+def save_in_pipeline(data:pd.DataFrame, folder, name:str)->None:
+
+    saving_name = f"{name}.csv" if name[-4:] != ".csv" else name
+    os.makedirs(folder, exist_ok=True)
+    save_path = os.path.join(folder, saving_name)
+    data.to_csv(save_path, index=False, header=True)
+    
 run = Run.get_context()
 parser = argparse.ArgumentParser()
 parser.add_argument("--config", type=json.loads, dest="config") #Les hyperparamètres, est un dictionnaire!
@@ -54,11 +61,22 @@ parser.add_argument("--output-folder", type=str, dest="output_folder") #Folder d
 args = parser.parse_args()
 config = args.config 
 new_dataset = run.input_datasets[config.get("new_dataset_name")].to_pandas_dataframe() #Les datasets deviennent des DataFrames
+save_in_pipeline(new_dataset, args.output_folder, config.get("new_dataset_name"))
 test_dataset = run.input_datasets[config.get("test_dataset_name")].to_pandas_dataframe()
+save_in_pipeline(test_dataset, args.output_folder, config.get("test_dataset_name"))
 
 # TODO
 
 run.complete()
+```
+**Exemple 1.2) Script Python associé à un step du Pipeline AVEC ScriptWrapper**  
+Le même step qu'en 1.1, mais utilise la classe ScriptWrapper d'azureml_wrapper.
+```
+script_wrapper = ScriptWrapper()
+config = script.get_config()
+new_dataset = script.get_csv_from_config(config.get("new_dataset_name"))
+script.save_csv_in_output_folder(new_dataset, config.get("new_dataset_name"))
+script.run.complete()
 ```
 
 **Exemple 2) Création d'un step de pipeline via PipelineStep**  
@@ -131,5 +149,5 @@ pipeline.register("nom du pipeline", "courte description du pipeline", "Week", i
 
 3) Enregistrer le pipeline avec schédule de relancement quand un blob est mis à jour:  
 ```
-pipeline.register("nom du pipeline", "courte description du pipeline", "On_blob_change", datastore_name="nom du Datastore vers blob")  
-```
+pipeline.register("nom du pipeline", "courte description du pipeline", "On_blob_change", datastore_name="nom du Datastore vers blob") ```
+
